@@ -1,7 +1,7 @@
 {
     "name": "LLM Event Extraction Demo",
     "image": "mcr.microsoft.com/vscode/devcontainers/python:3.11",
-    "postCreateCommand": "pip install openai==1.14.0 pydantic==2.6.0",
+    "postCreateCommand": "pip install openai==1.65.4 pydantic==2.6.0",
     "customizations": {
         "vscode": {
             "extensions": [
