@@ -1,9 +1,10 @@
-from typing import Optional
-from datetime import datetime
-from pydantic import BaseModel, Field
-from openai import OpenAI
-import os
 import logging
+import os
+from datetime import datetime
+from typing import Optional
+
+from openai import OpenAI
+from pydantic import BaseModel
 
 # Basic logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
@@ -12,15 +13,19 @@ logger = logging.getLogger(__name__)
 # Load API key from environment (set via Codespaces Secrets or 1Password)
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
-    raise ValueError("Please set OPENAI_API_KEY in your environment (check 1Password or Codespaces Secrets).")
+    raise ValueError(
+        "Please set OPENAI_API_KEY in your environment (check 1Password or Codespaces Secrets).")
 client = OpenAI(api_key=api_key)
 model = "gpt-4o-mini-2024-07-18"
 
 # Data models
+
+
 class EventExtraction(BaseModel):
     description: str
     is_calendar_event: bool
     confidence_score: float
+
 
 class EventDetails(BaseModel):
     name: str
@@ -28,11 +33,14 @@ class EventDetails(BaseModel):
     duration_minutes: int
     participants: list[str]
 
+
 class EventConfirmation(BaseModel):
     confirmation_message: str
     calendar_link: Optional[str] = None
 
 # Functions
+
+
 def extract_event_info(user_input: str) -> EventExtraction:
     today = datetime.now().strftime("%A, %B %d, %Y")
     completion = client.beta.chat.completions.parse(
@@ -44,6 +52,7 @@ def extract_event_info(user_input: str) -> EventExtraction:
         response_format=EventExtraction,
     )
     return completion.choices[0].message.parsed
+
 
 def parse_event_details(description: str) -> EventDetails:
     today = datetime.now().strftime("%A, %B %d, %Y")
@@ -57,6 +66,7 @@ def parse_event_details(description: str) -> EventDetails:
     )
     return completion.choices[0].message.parsed
 
+
 def generate_confirmation(event_details: EventDetails) -> EventConfirmation:
     completion = client.beta.chat.completions.parse(
         model=model,
@@ -69,6 +79,8 @@ def generate_confirmation(event_details: EventDetails) -> EventConfirmation:
     return completion.choices[0].message.parsed
 
 # Main function
+
+
 def process_calendar_request(user_input: str) -> Optional[EventConfirmation]:
     logger.info("Processing request...")
     extraction = extract_event_info(user_input)
@@ -77,6 +89,7 @@ def process_calendar_request(user_input: str) -> Optional[EventConfirmation]:
         return None
     details = parse_event_details(extraction.description)
     return generate_confirmation(details)
+
 
 if __name__ == "__main__":
     user_input = "Let's schedule a 1h team meeting next Tuesday at 2pm with Alice and Bob to discuss the project roadmap."
